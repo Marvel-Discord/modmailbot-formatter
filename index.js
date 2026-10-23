@@ -90,12 +90,15 @@ module.exports = function ({ formats, webserver, config }) {
       contentSecurityPolicy: false,
     })
   );
-  let helmetMiddleware = webserver._router.stack.pop();
-  let oldHelmetIndex = webserver._router.stack.findIndex(
+  // Express 5 removed the internal app._router property; app.router is the
+  // public equivalent. Fall back for Express 4 compatibility.
+  const router = webserver._router || webserver.router;
+  let helmetMiddleware = router.stack.pop();
+  let oldHelmetIndex = router.stack.findIndex(
     (e) => e.name === helmetMiddleware.name
   );
   if (oldHelmetIndex !== -1) {
-    webserver._router.stack[oldHelmetIndex] = helmetMiddleware;
+    router.stack[oldHelmetIndex] = helmetMiddleware;
   }
 
   formats.setLogFormatter((thread, threadMessages, opts = {}) => {
